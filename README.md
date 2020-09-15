@@ -39,6 +39,8 @@ java -jar build/generate-span-java-1.0.0-runner.jar
 
 ## Creating a native executable
 
+ATTENTION: this is not working at the moment. See https://github.com/open-telemetry/opentelemetry-java/issues/1645
+
 You can create a native executable using: `./gradlew build -Dquarkus.package.type=native`.
 
 Or, if you don't have GraalVM installed, you can run the native executable build in a container using: `./gradlew build -Dquarkus.package.type=native -Dquarkus.native.container-build=true`.
