@@ -6,9 +6,10 @@ import javax.enterprise.event.ObservesAsync;
 import javax.inject.Inject;
 
 import io.observatorium.opentelemetry.generate.Pause;
-import io.opentelemetry.trace.Span;
-import io.opentelemetry.trace.Status;
-import io.opentelemetry.trace.Tracer;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
 
 @ApplicationScoped
 public class InventoryService {
@@ -17,9 +18,9 @@ public class InventoryService {
     Tracer tracer;
 
     @Inject
-    private Event<OrderReceived> orderReceivedEvent;
+    Event<OrderReceived> orderReceivedEvent;
 
-    public void processOrder(Span parent) {
+    public void processOrder(Context parent) {
         Span span = tracer.spanBuilder("processOrder").setParent(parent).startSpan();
         Pause.forSomeTime();
         orderReceivedEvent.fireAsync(new OrderReceived(parent));
@@ -35,7 +36,7 @@ public class InventoryService {
     public void updateInventory(@ObservesAsync OrderReceived event) {
         Span span = tracer.spanBuilder("updateInventory").setParent(event.getParentSpan()).startSpan();
         Pause.forSomeTime();
-        span.setStatus(Status.UNAVAILABLE.withDescription("Cannot open connection to storage. Queueing update."));
+        span.setStatus(StatusCode.ERROR, "Cannot open connection to storage. Queueing update.");
         span.end();
     }
 

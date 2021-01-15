@@ -9,7 +9,7 @@ You can run your application in dev mode that enables live coding using:
 ./gradlew quarkusDev
 ```
 
-You'll need an instance of OpenTelemetry Collector available on `localhost:55680`. When using a different endpoint, use env vars (`OTEL_OTLP_ENDPOINT=remote-host:55680`) or system properties (`-Dotel.otlp.endpoint=remote-host:55680`) to configure the tracer.
+You'll need an instance of OpenTelemetry Collector available on `localhost:4317`. When using a different endpoint, use env vars (`OTEL_OTLP_ENDPOINT=remote-host:4317`) or system properties (`-Dotel.otlp.endpoint=remote-host:4317`) to configure the tracer.
 
 For all available options, check the OpenTelemetry Java SDK documentation.
 
@@ -36,6 +36,8 @@ If you want to build an _über-jar_, just add the `--uber-jar` option to the com
 ./gradlew quarkusBuild --uber-jar
 java -jar build/generate-span-java-1.0.0-runner.jar
 ```
+
+To package the application as a container image, run `./gradlew assemble -Dquarkus.container-image.build=true`.
 
 ## Creating a native executable
 

@@ -1,44 +1,47 @@
 package io.observatorium.opentelemetry.generate.inventory;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
 
-import io.opentelemetry.common.AttributeValue;
-import io.opentelemetry.common.Attributes;
-import io.opentelemetry.exporters.otlp.OtlpGrpcSpanExporter;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.resources.ResourceAttributes;
-import io.opentelemetry.sdk.trace.TracerSdkProvider;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
-import io.opentelemetry.trace.Tracer;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
 
 @ApplicationScoped
 public class TracerInitializer {
-    TracerSdkProvider sdkProvider;
+    OpenTelemetrySdk sdkProvider;
 
     @Produces
     @Inventory
     Tracer tracer;
 
     void onStart(@Observes StartupEvent ev) {
-        sdkProvider = TracerSdkProvider.builder().setResource(Resource.create(
-                Attributes.of(ResourceAttributes.SERVICE_NAME.key(), AttributeValue.stringAttributeValue("inventory"))))
-                .build();
+        OtlpGrpcSpanExporter spanExporter = OtlpGrpcSpanExporter.builder().setTimeout(2, TimeUnit.SECONDS).build();
+        BatchSpanProcessor spanProcessor = BatchSpanProcessor.builder(spanExporter)
+                .setScheduleDelay(100, TimeUnit.MILLISECONDS).build();
 
-        OtlpGrpcSpanExporter spanExporter = OtlpGrpcSpanExporter.getDefault();
-        BatchSpanProcessor spanProcessor = BatchSpanProcessor.newBuilder(spanExporter).setScheduleDelayMillis(100)
-                .build();
-        sdkProvider.addSpanProcessor(spanProcessor);
+        sdkProvider = OpenTelemetrySdk.builder()
+                .setTracerProvider(SdkTracerProvider.builder().addSpanProcessor(spanProcessor)
+                        .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "inventory")))
+                        .build())
+                .buildAndRegisterGlobal();
 
-        tracer = sdkProvider.get("inventory");
+        tracer = sdkProvider.getTracer("inventory");
     }
 
     void onStop(@Observes ShutdownEvent ev) {
         // shutdown for processors and exporters should be called as a result of
         // shutting down the tracing provider
-        sdkProvider.shutdown();
+        sdkProvider.getTracerManagement().shutdown();
     }
 }
