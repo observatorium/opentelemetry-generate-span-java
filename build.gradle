@@ -13,17 +13,18 @@ dependencies {
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-resteasy'
 
-    implementation 'io.opentelemetry:opentelemetry-api:0.8.0'
-    implementation 'io.opentelemetry:opentelemetry-sdk:0.8.0'
-    implementation 'io.opentelemetry:opentelemetry-exporters-otlp:0.8.0'
-    implementation 'io.grpc:grpc-okhttp:1.31.1'
+    implementation platform("io.opentelemetry:opentelemetry-bom:0.14.1")
+    implementation("io.opentelemetry:opentelemetry-api")
+    implementation("io.opentelemetry:opentelemetry-sdk")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+    implementation "io.grpc:grpc-netty-shaded"
 
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
 }
 
 group 'io.observatorium.opentelemetry'
-version '1.0.0'
+version '0.1.0'
 
 compileJava {
     options.encoding = 'UTF-8'

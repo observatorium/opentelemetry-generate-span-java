@@ -1,15 +1,15 @@
 package io.observatorium.opentelemetry.generate.inventory;
 
-import io.opentelemetry.trace.Span;
+import io.opentelemetry.context.Context;
 
 public class OrderReceived {
-    Span parent;
+    Context parent;
 
-    public OrderReceived(Span parent) {
+    public OrderReceived(Context parent) {
         this.parent = parent;
     }
 
-    public Span getParentSpan() {
+    public Context getParentSpan() {
         return this.parent;
     }
 }
