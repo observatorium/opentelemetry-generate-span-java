@@ -11,9 +11,9 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.sdk.resources.ResourceAttributes;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
 
@@ -33,7 +33,7 @@ public class TracerInitializer {
         sdkProvider = OpenTelemetrySdk.builder()
                 .setTracerProvider(SdkTracerProvider.builder().addSpanProcessor(spanProcessor)
                         .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "order"))).build())
-                .buildAndRegisterGlobal();
+                .build();
 
         tracer = sdkProvider.getTracer("order");
     }
@@ -41,6 +41,6 @@ public class TracerInitializer {
     void onStop(@Observes ShutdownEvent ev) {
         // shutdown for processors and exporters should be called as a result of
         // shutting down the tracing provider
-        sdkProvider.getTracerManagement().shutdown();
+        sdkProvider.getSdkTracerProvider().shutdown();
     }
 }
